@@ -1,3 +1,4 @@
+import qualified Data.Text as Text
 import Frontend
 import Common.Route
 import Obelisk.Frontend
@@ -6,5 +7,6 @@ import Reflex.Dom
 
 main :: IO ()
 main = do
-  let Right validFullEncoder = checkEncoder fullRouteEncoder
-  run $ runFrontend validFullEncoder frontend
+  case checkEncoder fullRouteEncoder of
+    Left err -> error $ "frontend:main: " <> Text.unpack err
+    Right validFullEncoder -> run $ runFrontend validFullEncoder frontend

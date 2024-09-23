@@ -1,5 +1,5 @@
 cabal-version: 2.2
-name: common
+name: dev
 version: 0.1
 build-type: Simple
 
@@ -55,6 +55,10 @@ common ghc2024
     LambdaCase
     RoleAnnotations
 
+common native
+  if impl(ghcjs)
+    buildable: False
+
 common defaults
   import: ghc2024
   ghc-options:
@@ -76,11 +80,14 @@ common defaults
       -Wmissing-deriving-strategies
 
 library
-  import: defaults
+  import: defaults, native
   hs-source-dirs: src
-  build-depends: base
-               , obelisk-route
-               , text
+  build-depends:
+      backend
+    , base
+    , directory
+    , frontend
+    , obelisk-run
+
   exposed-modules:
-    Common.Api
-    Common.Route
+    Dev

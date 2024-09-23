@@ -1,5 +1,5 @@
 { system ? builtins.currentSystem
-, obelisk ? import ./.obelisk/impl {
+, obelisk ? import (import ./deps.nix).pins.obelisk {
     inherit system;
     iosSdkVersion = "16.1";
 
@@ -15,9 +15,20 @@
   }
 }:
 with obelisk;
-project ./. ({ ... }: {
+project ./. ({ pkgs, ... }: {
   android.applicationId = "systems.obsidian.obelisk.examples.minimal";
   android.displayName = "Obelisk Minimal Example";
   ios.bundleIdentifier = "systems.obsidian.obelisk.examples.minimal";
   ios.bundleName = "Obelisk Minimal Example";
+
+  packages = {
+    dev = ./dev;
+  };
+
+  overrides = with pkgs.haskell.lib; pkgs.lib.foldr pkgs.lib.composeExtensions (_: _: {}) [
+    (self: super: {
+      # inherit (deps.packages self) packages go here;
+    })
+  ];
+
 })

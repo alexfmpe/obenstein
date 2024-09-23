@@ -9,9 +9,12 @@ library
     buildable: False
   build-depends: base
                , common
+               , directory
                , frontend
                , obelisk-backend
+               , obelisk-frontend
                , obelisk-route
+               , obelisk-run
   exposed-modules:
     Backend
   ghc-options: -Wall -O -fno-show-valid-hole-fits

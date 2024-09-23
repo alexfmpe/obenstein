@@ -35,6 +35,7 @@ executable frontend
                , obelisk-frontend
                , obelisk-route
                , reflex-dom
+               , text
   ghc-options: -Wall -O -fno-show-valid-hole-fits -threaded
                -- unsafe code
                -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields

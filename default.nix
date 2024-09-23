@@ -14,10 +14,25 @@
     # terms.security.acme.acceptTerms = false;
   }
 }:
-with obelisk;
-project ./. ({ ... }: {
+let
+  deps = import ./deps.nix;
+
+in with obelisk;
+project ./. ({ pkgs, ... }: {
   android.applicationId = "systems.obsidian.obelisk.examples.minimal";
   android.displayName = "Obelisk Minimal Example";
   ios.bundleIdentifier = "systems.obsidian.obelisk.examples.minimal";
   ios.bundleName = "Obelisk Minimal Example";
+
+  packages = {};
+
+  shellToolOverrides = self: super: {
+#    haskell-language-server = pkgs.haskell.packages.ghc8107.haskell-language-server;
+  };
+
+  overrides = with pkgs.haskell.lib; pkgs.lib.foldr pkgs.lib.composeExtensions (_: _: {}) [
+    (self: super: {
+      inherit (deps.packages self) base16 crypton lens-aeson;
+    })
+  ];
 })

@@ -9,24 +9,8 @@ let
     inherit config;
   });
 
-  nixpkgsEval  = nixpkgsWith { localSystem = builtins.currentSystem; };
-  nixpkgsCross = nixpkgsWith { localSystem = buildPlatform; crossSystem = hostPlatform; };
-  nixpkgsDocker =
-    let linuxSystem = builtins.replaceStrings [ "darwin" ] [ "linux" ] builtins.currentSystem; # aarch64-darwin -> aarch64-linux, etc
-    in nixpkgsWith {
-      localSystem = linuxSystem; # We cannot cross-compile directly, so need to *build on* a linux builder VM
-      crossSystem = linuxSystem; # Output will *run on* a linux system
-      overlays = [ dockerWithoutKVM ];
-    };
-
-  # https://github.com/NixOS/nixpkgs/issues/67079#issuecomment-920364273
-  dockerWithoutKVM = final: prev:
-    let
-      runInLinuxVMNoKVM = drv: final.lib.overrideDerivation (final.vmTools.runInLinuxVM drv) (_: { requiredSystemFeatures = []; });
-      modifiedVmTools = prev.vmTools // { runInLinuxVM = runInLinuxVMNoKVM; };
-    in {
-      dockerTools = prev.dockerTools.override { vmTools = modifiedVmTools; };
-    };
+  nixpkgsEval   = nixpkgsWith { localSystem = builtins.currentSystem; };
+  nixpkgsCross  = nixpkgsWith { localSystem = buildPlatform; crossSystem = hostPlatform; };
 
   overrides = nixpkgs: self: super: with nixpkgs.haskell.lib.compose;
     let
@@ -39,7 +23,7 @@ let
           obelisk = import deps.pins.obelisk {};
           processed = (obelisk.processAssets { src = ./static; packageName = name; }).overrideAttrs (_: _: {
             # Otherwise defaults to obelisk-asset-manifest from bundled 8.10 package set and rebuilds the world
-            nativeBuildInputs = [ nixpkgsEval.haskellPackages.obelisk-asset-manifest ];
+            nativeBuildInputs = [ nixpkgsEval.haskell.packages.${compiler}.obelisk-asset-manifest ];
           });
         in {
           "${name}" = self.callCabal2nix name processed.haskellManifest {};
@@ -55,22 +39,10 @@ let
       };
 
     in staticAssetsOverride // {
-      frontend = nixpkgs.lib.pipe (self.callCabal2nix "frontend" ./frontend {})
-        [ buildStrictly
-          dontHaddock
-          justStaticExecutables # https://github.com/NixOS/nixpkgs/blob/f73ed219335199067ae839ae4db2a32af2b879ed/doc/languages-frameworks/haskell.section.md#packaging-helpers-haskell-packaging-helpers
-        ];
-
-      backend = nixpkgs.lib.pipe (self.callCabal2nix "backend" ./backend {})
-        [ buildStrictly
-          dontHaddock
-          justStaticExecutables
-        ];
-
-      common = nixpkgs.lib.pipe (self.callCabal2nix "common" ./common {})
-        [ buildStrictly
-          dontHaddock
-        ];
+      backend = self.callCabal2nix "backend" ./backend {};
+      common = self.callCabal2nix "common" ./common {};
+      dev = self.callCabal2nix "dev" ./dev {};
+      frontend = self.callCabal2nix "frontend" ./frontend {};
 
       # need newer version for proper deriving with ghc 9.6
       dependent-sum-template = self.callHackage "dependent-sum-template" "0.2.0.1" {};
@@ -114,12 +86,10 @@ let
   };
 
 in rec {
-  inherit deps nixpkgsEval nixpkgsCross nixpkgsDocker;
-
-  ci = nixpkgsCross.haskell.packages.${compiler}.backend;
+  inherit deps nixpkgsEval nixpkgsCross;
 
   shell = nixpkgsEval.haskell.packages.${compiler}.shellFor {
-    packages = p: with p; [ common backend frontend ];
+    packages = p: with p; [ common backend frontend dev ];
     strictDeps = true;
     withHoogle = true;
     nativeBuildInputs = builtins.concatLists [

@@ -26,31 +26,7 @@ let
 
   };
 
-  packages = self: with self; {
-
-    # 8.10 package set: Not yet present in pinned snapshot
-    base16 = callHackageDirect {
-      pkg = "base16";
-      ver = "1.0";
-      sha256 = "sha256-pLnipLnF7YuQvCwgw7Lp7sbwhab63sdEpubeSpaoEmY=";
-    } {};
-
-    # 8.10 package set: Not yet present in pinned snapshot
-    crypton = callHackageDirect {
-      pkg = "crypton";
-      ver = "0.34";
-      sha256 = "sha256-dHvzmwq5l1dPZsp0sYFe9l8mXF/Ya5aFbkDg0ljEEKY=";
-    } {};
-
-    # 8.10 package set:
-    #   Setup: Encountered missing or private dependencies:
-    #   aeson >=0.7.0.5 && <2.1
-    lens-aeson = callHackageDirect {
-      pkg = "lens-aeson";
-      ver = "1.2.3";
-      sha256 = "sha256-M0+QJWxN8BCpxxJhZxXSPy5Revf9p2M9uvm4gSXdE4k=";
-    } {};
-  };
+  packages = self: with self; {};
 
   patches = {};
 

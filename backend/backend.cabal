@@ -1,6 +1,6 @@
+cabal-version: 2.2
 name: backend
 version: 0.1
-cabal-version: >= 1.8
 build-type: Simple
 
 library
@@ -9,12 +9,9 @@ library
     buildable: False
   build-depends: base
                , common
-               , directory
                , frontend
                , obelisk-backend
-               , obelisk-frontend
                , obelisk-route
-               , obelisk-run
   exposed-modules:
     Backend
   ghc-options: -Wall -O -fno-show-valid-hole-fits

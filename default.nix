@@ -1,5 +1,5 @@
 { system ? builtins.currentSystem
-, obelisk ? import ./.obelisk/impl {
+, obelisk ? import (import ./deps.nix).pins.obelisk {
     inherit system;
     iosSdkVersion = "16.1";
 
@@ -14,25 +14,21 @@
     # terms.security.acme.acceptTerms = false;
   }
 }:
-let
-  deps = import ./deps.nix;
-
-in with obelisk;
+with obelisk;
 project ./. ({ pkgs, ... }: {
   android.applicationId = "systems.obsidian.obelisk.examples.minimal";
   android.displayName = "Obelisk Minimal Example";
   ios.bundleIdentifier = "systems.obsidian.obelisk.examples.minimal";
   ios.bundleName = "Obelisk Minimal Example";
 
-  packages = {};
-
-  shellToolOverrides = self: super: {
-#    haskell-language-server = pkgs.haskell.packages.ghc8107.haskell-language-server;
+  packages = {
+    dev = ./dev;
   };
 
   overrides = with pkgs.haskell.lib; pkgs.lib.foldr pkgs.lib.composeExtensions (_: _: {}) [
     (self: super: {
-      inherit (deps.packages self) base16 crypton lens-aeson;
+      # inherit (deps.packages self) packages go here;
     })
   ];
+
 })

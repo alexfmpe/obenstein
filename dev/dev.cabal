@@ -1,5 +1,5 @@
 cabal-version: 2.2
-name: frontend
+name: dev
 version: 0.1
 build-type: Simple
 
@@ -55,6 +55,10 @@ common ghc2024
     LambdaCase
     RoleAnnotations
 
+common native
+  if impl(ghcjs)
+    buildable: False
+
 common defaults
   import: ghc2024
   ghc-options:
@@ -76,34 +80,14 @@ common defaults
       -Wmissing-deriving-strategies
 
 library
-  import: defaults
+  import: defaults, native
   hs-source-dirs: src
-  build-depends: base
-               , common
-               , jsaddle
-               , lens
-               , obelisk-executable-config-lookup
-               , obelisk-frontend
-               , obelisk-generated-static
-               , obelisk-route
-               , reflex-dom-core
-               , text
-  exposed-modules:
-    Frontend
+  build-depends:
+      backend
+    , base
+    , directory
+    , frontend
+    , obelisk-run
 
-executable frontend
-  import: defaults
-  main-is: main.hs
-  hs-source-dirs: src-bin
-  build-depends: base
-               , common
-               , frontend
-               , obelisk-frontend
-               , obelisk-route
-               , reflex-dom
-               , text
-  if impl(ghcjs)
-    ghc-options: -dedupe
-    cpp-options: -DGHCJS_BROWSER
-  if os(darwin)
-    ghc-options: -dynamic
+  exposed-modules:
+    Dev

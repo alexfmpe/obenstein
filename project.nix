@@ -1,11 +1,11 @@
-{ compiler ? "ghc98"
+{ compiler ? "ghc910"
 }:
 let
   pins = {
-    # merge of https://github.com/NixOS/nixpkgs/pull/401526
+    # merge of https://github.com/NixOS/nixpkgs/pull/444862
     nixpkgs = builtins.fetchTarball {
-      url = "https://github.com/NixOS/nixpkgs/archive/a9245b8f22bb81675d374aed93736930f5109503.tar.gz";
-      sha256 = "sha256:0jcnmb0smaqz7fiyzc51n2cyn9s81h3j285wv47bxifk0rvavca2";
+      url = "https://github.com/NixOS/nixpkgs/archive/15ed8f7638116135ac9d3bd4353c482e7c539e0f.tar.gz";
+      sha256 = "sha256:00ypnmxqm216jw55gvrh64v7shadzr16ppp3c7qpbxlkiq0mdars";
     };
 
     obelisk = import ./.obelisk/impl/thunk.nix;

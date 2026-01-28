@@ -8,6 +8,13 @@ let
       sha256 = "sha256:00ypnmxqm216jw55gvrh64v7shadzr16ppp3c7qpbxlkiq0mdars";
     };
 
+    servant-reflex = nixpkgs.fetchFromGitHub {
+      repo = "servant-reflex";
+      owner = "alexfmpe";
+      rev = "94086ddd1184557f1288c88fcdcea37f6d856252";
+      sha256 = "sha256-e0P5cNVzDeF+n3jeo1dFAHzlCXqc7ODBcFHXiewVDgM";
+    };
+
     obelisk = import ./.obelisk/impl/thunk.nix;
   };
 
@@ -16,7 +23,7 @@ let
     overlays = [(import (pins.obelisk + "/nixpkgs-overlays/default.nix"))];
   };
 
-  overrides = self: super:
+  overrides = self: super: with nixpkgs.haskell.lib.compose;
     let
       staticAssetsOverride =
         let
@@ -35,6 +42,8 @@ let
       common = self.callCabal2nix "common" ./common {};
       dev = self.callCabal2nix "dev" ./dev {};
       frontend = self.callCabal2nix "frontend" ./frontend {};
+
+      servant-reflex = self.callCabal2nix "servant-reflex" pins.servant-reflex {};
 
       obelisk-executable-config-lookup = self.callCabal2nixWithOptions
         "obelisk-executable-config-lookup"

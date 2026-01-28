@@ -87,6 +87,7 @@ library
                , obelisk-generated-static
                , obelisk-route
                , reflex-dom-core
+               , servant-reflex
                , text
   exposed-modules:
     Frontend

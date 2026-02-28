@@ -3,7 +3,7 @@
 let
   pins = {
     # merge of https://github.com/NixOS/nixpkgs/pull/488406
-    nixpkgs = builtins.fetchTarball {
+    nixpkgs = fetchTarball {
       url = "https://github.com/NixOS/nixpkgs/archive/bd5580cf56affe8d8515dd50cedbdb467838954f.tar.gz";
       sha256 = "sha256:006yhdl91ggk2hpq4y6wddzxzw5jdp0qrm9yrbwsa40g4274zld0";
     };

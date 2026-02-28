@@ -2,10 +2,10 @@
 }:
 let
   pins = {
-    # merge of https://github.com/NixOS/nixpkgs/pull/444862
+    # merge of https://github.com/NixOS/nixpkgs/pull/488406
     nixpkgs = builtins.fetchTarball {
-      url = "https://github.com/NixOS/nixpkgs/archive/15ed8f7638116135ac9d3bd4353c482e7c539e0f.tar.gz";
-      sha256 = "sha256:00ypnmxqm216jw55gvrh64v7shadzr16ppp3c7qpbxlkiq0mdars";
+      url = "https://github.com/NixOS/nixpkgs/archive/bd5580cf56affe8d8515dd50cedbdb467838954f.tar.gz";
+      sha256 = "sha256:006yhdl91ggk2hpq4y6wddzxzw5jdp0qrm9yrbwsa40g4274zld0";
     };
 
     obelisk = import ./.obelisk/impl/thunk.nix;

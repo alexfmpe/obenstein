@@ -1,11 +1,11 @@
-{ compiler ? "ghc910"
+{ compiler ? "ghc912"
 }:
 let
   pins = {
-    # merge of https://github.com/NixOS/nixpkgs/pull/488406
+    # WIP of https://github.com/NixOS/nixpkgs/pull/521260
     nixpkgs = fetchTarball {
-      url = "https://github.com/NixOS/nixpkgs/archive/bd5580cf56affe8d8515dd50cedbdb467838954f.tar.gz";
-      sha256 = "sha256:006yhdl91ggk2hpq4y6wddzxzw5jdp0qrm9yrbwsa40g4274zld0";
+      url = "https://github.com/NixOS/nixpkgs/archive/40b76b77e7176534d7ab8897d92379005d66d033.tar.gz";
+      sha256 = "sha256-T9y3hXpQH/QMlg4xaiH1anPM9tvB6XBWJsbW7e89DP4";
     };
 
     obelisk = import ./.obelisk/impl/thunk.nix;
@@ -36,11 +36,16 @@ let
       dev = self.callCabal2nix "dev" ./dev {};
       frontend = self.callCabal2nix "frontend" ./frontend {};
 
+      # 'Some' import conflicts. Let upstream handle it
+      obelisk-route = nixpkgs.haskell.lib.dontCheck super.obelisk-route;
+
       obelisk-executable-config-lookup = self.callCabal2nixWithOptions
         "obelisk-executable-config-lookup"
         pins.obelisk
         "--subpath lib/executable-config/lookup"
         {};
+
+      patch = nixpkgs.haskell.lib.doJailbreak super.patch;
     };
 
   config = {
@@ -49,8 +54,8 @@ let
         packages = nixpkgs.haskell.packages // {
           "${compiler}" = nixpkgs.haskell.packages.${compiler}.override(old: {
             overrides = nixpkgs.lib.foldr nixpkgs.lib.composeExtensions  (_: _: {}) [
-              overrides
               (import (pins.obelisk + "/haskell-overlays/obelisk.nix"))
+              overrides
             ];
           });
         };

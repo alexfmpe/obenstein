@@ -1,4 +1,4 @@
-{ compiler ? "ghc912"
+{ compiler ? "ghc914"
 }:
 let
   pins = {
@@ -30,14 +30,20 @@ let
           "${name}" = self.callCabal2nix name processed.haskellManifest {};
         };
 
-    in staticAssetsOverride // {
+    in with nixpkgs.haskell.lib; staticAssetsOverride // {
       backend = self.callCabal2nix "backend" ./backend {};
       common = self.callCabal2nix "common" ./common {};
       dev = self.callCabal2nix "dev" ./dev {};
       frontend = self.callCabal2nix "frontend" ./frontend {};
 
+      # Flaky test
+      time-manager = dontCheck super.time-manager;
+
+      # Cabal 3.18 needs newer process on mac
+      # process = super.process_1_6_30_0;
+
       # 'Some' import conflicts. Let upstream handle it
-      obelisk-route = nixpkgs.haskell.lib.dontCheck super.obelisk-route;
+      obelisk-route = dontCheck super.obelisk-route;
 
       obelisk-executable-config-lookup = self.callCabal2nixWithOptions
         "obelisk-executable-config-lookup"
@@ -45,7 +51,11 @@ let
         "--subpath lib/executable-config/lookup"
         {};
 
-      patch = nixpkgs.haskell.lib.doJailbreak super.patch;
+#      Cabal = dontCheck super.Cabal;
+      dependent-sum-template = doJailbreak super.dependent-sum-template;
+      ghcjs-dom = doJailbreak super.ghcjs-dom;
+      patch = doJailbreak super.patch;
+      reflex = doJailbreak super.reflex;
     };
 
   config = {
@@ -73,6 +83,7 @@ in {
     nativeBuildInputs = with nixpkgs; [
       cabal-install
       ghcid
+      nixpkgs.haskell.packages.${compiler}.haskell-debugger
       haskell-language-server
       hlint
     ];

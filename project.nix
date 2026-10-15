@@ -1,11 +1,11 @@
-{ compiler ? "ghc910"
+{ compiler ? "ghc912"
 }:
 let
   pins = {
-    # merge of https://github.com/NixOS/nixpkgs/pull/488406
+    # WIP of https://github.com/NixOS/nixpkgs/pull/521260
     nixpkgs = fetchTarball {
-      url = "https://github.com/NixOS/nixpkgs/archive/bd5580cf56affe8d8515dd50cedbdb467838954f.tar.gz";
-      sha256 = "sha256:006yhdl91ggk2hpq4y6wddzxzw5jdp0qrm9yrbwsa40g4274zld0";
+      url = "https://github.com/NixOS/nixpkgs/archive/55b3962e004c966fcfb93b7a86ca4b26eaf0d851.tar.gz";
+      sha256 = "sha256-Dzq2jLw/czJ7mf8YmSi/8gqVlTnLWnNNUscSElGjf48";
     };
 
     obelisk = import ./.obelisk/impl/thunk.nix;
@@ -16,7 +16,7 @@ let
     overlays = [(import (pins.obelisk + "/nixpkgs-overlays/default.nix"))];
   };
 
-  overrides = self: super:
+  overrides = self: super: with nixpkgs.haskell.lib;
     let
       staticAssetsOverride =
         let
@@ -36,11 +36,18 @@ let
       dev = self.callCabal2nix "dev" ./dev {};
       frontend = self.callCabal2nix "frontend" ./frontend {};
 
+      # 'Some' import conflicts. Let upstream handle it
+      obelisk-route = dontCheck super.obelisk-route;
+
       obelisk-executable-config-lookup = self.callCabal2nixWithOptions
         "obelisk-executable-config-lookup"
         pins.obelisk
         "--subpath lib/executable-config/lookup"
         {};
+
+      patch = doJailbreak super.patch;
+
+      time-manager = dontCheck super.time-manager;
     };
 
   config = {
@@ -49,8 +56,8 @@ let
         packages = nixpkgs.haskell.packages // {
           "${compiler}" = nixpkgs.haskell.packages.${compiler}.override(old: {
             overrides = nixpkgs.lib.foldr nixpkgs.lib.composeExtensions  (_: _: {}) [
-              overrides
               (import (pins.obelisk + "/haskell-overlays/obelisk.nix"))
+              overrides
             ];
           });
         };

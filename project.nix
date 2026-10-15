@@ -1,4 +1,4 @@
-{ compiler ? "ghc912"
+{ compiler ? "ghc914"
 }:
 let
   pins = {
@@ -36,6 +36,12 @@ let
       dev = self.callCabal2nix "dev" ./dev {};
       frontend = self.callCabal2nix "frontend" ./frontend {};
 
+      # Flaky test
+      time-manager = dontCheck super.time-manager;
+
+      # Broken test
+      tls = dontCheck super.tls;
+
       # 'Some' import conflicts. Let upstream handle it
       obelisk-route = dontCheck super.obelisk-route;
 
@@ -45,9 +51,11 @@ let
         "--subpath lib/executable-config/lookup"
         {};
 
+      dependent-sum-template = doJailbreak super.dependent-sum-template;
+      ghcjs-dom = doJailbreak super.ghcjs-dom;
       patch = doJailbreak super.patch;
-
-      time-manager = dontCheck super.time-manager;
+      reflex = doJailbreak super.reflex;
+      reflex-dom-core = doJailbreak super.reflex-dom-core;
     };
 
   config = {
@@ -75,6 +83,7 @@ in {
     nativeBuildInputs = with nixpkgs; [
       cabal-install
       ghcid
+      nixpkgs.haskell.packages.${compiler}.haskell-debugger
       haskell-language-server
       hlint
     ];
